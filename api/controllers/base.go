@@ -16,9 +16,20 @@ type Server struct {
 }
 
 // Initialize the routes
-func (s *Server) Initialize(storageType string) {
+func (s *Server) Initialize(storageType *string) {
 	s.Router = mux.NewRouter()
-	s.Cache = models.NewRecord()
+
+	switch *storageType {
+	case "in-memory":
+		s.Cache = models.NewCache()
+	case "disk":
+		s.Cache = models.NewDisk()
+	default:
+		log.Fatal("Use flags `in-memory` or `disk`")
+	}
+
+	log.Printf("Starting server with %v storage", *storageType)
+
 	s.initializeRoutes()
 }
 
