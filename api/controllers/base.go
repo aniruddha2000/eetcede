@@ -16,7 +16,7 @@ type Server struct {
 }
 
 // Initialize the routes
-func (s *Server) Initialize() {
+func (s *Server) Initialize(storageType string) {
 	s.Router = mux.NewRouter()
 	s.Cache = models.NewRecord()
 	s.initializeRoutes()

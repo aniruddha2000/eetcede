@@ -7,10 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *Server) CreateRecord(w http.ResponseWriter, r *http.Request) {
-	// key := r.URL.Query().Get("key")
-	// val := r.URL.Query().Get("val")
-
+func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	key := r.Form["key"]
 	val := r.Form["val"]
@@ -22,15 +19,15 @@ func (s *Server) CreateRecord(w http.ResponseWriter, r *http.Request) {
 	j.JSON(w, r, http.StatusCreated, "Record created")
 }
 
-func (s *Server) GetAllRecords(w http.ResponseWriter, r *http.Request) {
-	records := s.Cache.FindAllRecords()
+func (s *Server) List(w http.ResponseWriter, r *http.Request) {
+	records := s.Cache.ListRecord()
 	j.JSON(w, r, http.StatusOK, records)
 }
 
-func (s *Server) GetRecord(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Get(w http.ResponseWriter, r *http.Request) {
 	key := mux.Vars(r)["key"]
 
-	val, err := s.Cache.FindRecord(key)
+	val, err := s.Cache.GetValue(key)
 	if err != nil {
 		j.JSON(w, r, http.StatusNotFound, err.Error())
 		return
@@ -38,10 +35,10 @@ func (s *Server) GetRecord(w http.ResponseWriter, r *http.Request) {
 	j.JSON(w, r, http.StatusOK, map[string]string{key: val})
 }
 
-func (s *Server) DeleteRecord(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 	key := mux.Vars(r)["key"]
 
-	err := s.Cache.DeleteRecordByKey(key)
+	err := s.Cache.DeleteRecord(key)
 	if err != nil {
 		j.JSON(w, r, http.StatusNotFound, err.Error())
 		return

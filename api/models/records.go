@@ -3,7 +3,7 @@ package models
 import "errors"
 
 // Key value strore struct
-type Record struct {
+type InMemory struct {
 	Data map[string]string `json:"data"`
 }
 
@@ -12,12 +12,12 @@ type StorageSetter interface {
 }
 
 type StorageGetter interface {
-	FindAllRecords() map[string]string
-	FindRecord(string) (string, error)
+	ListRecord() map[string]string
+	GetValue(string) (string, error)
 }
 
 type StorageDestroyer interface {
-	DeleteRecordByKey(string) error
+	DeleteRecord(string) error
 }
 
 type Storage interface {
@@ -26,19 +26,19 @@ type Storage interface {
 	StorageDestroyer
 }
 
-func NewRecord() *Record {
-	return &Record{Data: make(map[string]string, 2)}
+func NewRecord() *InMemory {
+	return &InMemory{Data: make(map[string]string, 2)}
 }
 
-func (r *Record) Store(key, val string) {
+func (r *InMemory) Store(key, val string) {
 	r.Data[key] = val
 }
 
-func (r *Record) FindAllRecords() map[string]string {
+func (r *InMemory) ListRecord() map[string]string {
 	return r.Data
 }
 
-func (r *Record) FindRecord(key string) (string, error) {
+func (r *InMemory) GetValue(key string) (string, error) {
 	val, ok := r.Data[key]
 	if !ok {
 		return "", errors.New("key not found")
@@ -46,7 +46,7 @@ func (r *Record) FindRecord(key string) (string, error) {
 	return val, nil
 }
 
-func (r *Record) DeleteRecordByKey(key string) error {
+func (r *InMemory) DeleteRecord(key string) error {
 	_, ok := r.Data[key]
 	if !ok {
 		return errors.New("key not found")
