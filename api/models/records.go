@@ -32,6 +32,7 @@ type Storage interface {
 	StorageDestroyer
 }
 
+// Return In Memory struct
 func NewCache() *InMemory {
 	return &InMemory{Data: make(map[string]string, 2)}
 }
