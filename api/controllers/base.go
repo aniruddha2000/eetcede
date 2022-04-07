@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,10 +17,10 @@ type Server struct {
 }
 
 // Initialize the routes
-func (s *Server) Initialize(storageType *string) {
+func (s *Server) Initialize(storageType string) {
 	s.Router = mux.NewRouter()
 
-	switch *storageType {
+	switch storageType {
 	case "in-memory":
 		s.Cache = models.NewCache()
 	case "disk":
@@ -28,13 +29,26 @@ func (s *Server) Initialize(storageType *string) {
 		log.Fatal("Use flags `in-memory` or `disk`")
 	}
 
-	log.Printf("Starting server with %v storage", *storageType)
+	log.Printf("Starting server with %v storage", storageType)
 
 	s.initializeRoutes()
 }
 
 // Run the server on desired port and logs the status
-func (server *Server) Run(addr string) {
+func (s *Server) Run(addr string) {
+	cert, err := tls.LoadX509KeyPair("localhost.crt", "localhost.key")
+	if err != nil {
+		log.Fatalf("Couldn't load the certificate: %v", cert)
+	}
+
+	server := &http.Server{
+		Addr:    ":" + addr,
+		Handler: s.Router,
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		},
+	}
+
 	fmt.Println("Listenning to port", addr)
-	log.Fatal(http.ListenAndServe(addr, server.Router))
+	log.Fatal(server.ListenAndServeTLS("", ""))
 }
