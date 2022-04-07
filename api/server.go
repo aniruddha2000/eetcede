@@ -16,6 +16,6 @@ func Run() {
 		"Define the storage type that will be used in the server. By defaut the value is in-memory.")
 	flag.Parse()
 
-	server.Initialize(&storageType)
-	server.Run(":8080")
+	server.Initialize(storageType)
+	server.Run("8080")
 }
