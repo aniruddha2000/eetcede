@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/afero"
 )
@@ -89,13 +88,13 @@ type Disk struct {
 // }
 
 func NewDisk() *Disk {
-	diskFs := afero.NewOsFs()
-	ok, err := afero.DirExists(diskFs, "storage")
+	diskFs := afero.NewBasePathFs(afero.NewOsFs(), "storage")
+	ok, err := afero.DirExists(diskFs, "")
 	if err != nil {
 		log.Fatalf("Dir exists: %v", err)
 	}
 	if !ok {
-		err := diskFs.Mkdir("storage", os.ModePerm)
+		err := diskFs.Mkdir("", os.ModePerm)
 		if err != nil {
 			log.Fatalf("Create dir: %v", err)
 		}
@@ -104,9 +103,7 @@ func NewDisk() *Disk {
 }
 
 func (d *Disk) Store(key, val string) {
-	fileName := filepath.Join("storage", key)
-
-	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	file, err := d.FS.Create(key)
 	if err != nil {
 		log.Fatalf("Create file: %v", err)
 	}
@@ -116,23 +113,17 @@ func (d *Disk) Store(key, val string) {
 	if err != nil {
 		log.Fatalf("Writing file: %v", err)
 	}
-
-	// file, err := d.FS.Open(key)
-	// if err != nil {
-	// 	log.Fatalf("Couldn't open file in filesystem : %v", err)
-	// }
-	// file.Read()
 }
 
 func (d *Disk) List() map[string]string {
 	m := make(map[string]string, 2)
-	dir, err := afero.ReadDir(d.FS, "storage")
+	dir, err := afero.ReadDir(d.FS, "")
 	if err != nil {
 		log.Fatalf("Error reading the directory: %v", err)
 	}
 
 	for _, fileName := range dir {
-		content, err := afero.ReadFile(d.FS, "storage/"+fileName.Name())
+		content, err := afero.ReadFile(d.FS, fileName.Name())
 		if err != nil {
 			log.Fatalf("Error reading the file: %v", err)
 		}
@@ -142,24 +133,30 @@ func (d *Disk) List() map[string]string {
 }
 
 func (d *Disk) Get(key string) (string, error) {
-	_, err := d.FS.Open("storage/" + key)
+	ok, err := afero.Exists(d.FS, key)
 	if err != nil {
-		return "", err
+		log.Fatalf("File exist: %v", err)
 	}
 
-	file, err := afero.ReadFile(d.FS, "storage/"+key)
-	if err != nil {
-		log.Fatalf("Error reading the file: %v", err)
+	if ok {
+		file, err := afero.ReadFile(d.FS, key)
+		if err != nil {
+			log.Fatalf("Error reading the file: %v", err)
+		}
+		return string(file), nil
 	}
-	return string(file), nil
+	return "", errors.New("key not found")
 }
 
 func (d *Disk) Delete(key string) error {
-	path := filepath.Join("storage", key)
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		err := os.Remove(path)
+	ok, err := afero.Exists(d.FS, key)
+	if err != nil {
+		log.Fatalf("File exist: %v", err)
+	}
+	if ok {
+		err = d.FS.Remove(key)
 		if err != nil {
-			log.Fatalf("%v Delete file err: %v", path, err)
+			log.Fatalf("Delete file err: %v", err)
 		}
 		return nil
 	}
