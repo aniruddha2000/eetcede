@@ -64,29 +64,9 @@ func (r *InMemory) Delete(key string) error {
 
 type Disk struct {
 	FS  afero.Fs
-	Key string `json:"key"`
-	Val string `json:"val"`
 }
 
-// type OpenFileFS interface {
-// 	fs.FS
-// 	OpenFile(name string, flag int, perm os.FileMode) (fs.File, error)
-// }
-
-// func OpenFile(fsys fs.FS, name string, flag int, perm os.FileMode) (fs.File, error) {
-// 	if fsys, ok := fsys.(OpenFileFS); ok {
-// 		return fsys.OpenFile(name, flag, perm)
-// 	}
-// 	if flag == os.O_RDONLY {
-// 		return fsys.Open(name)
-// 	}
-// 	return nil, fmt.Errorf("open %s: Operation not supported", name)
-// }
-
-// func Create(fsys fs.FS, name string) (fs.File, error) {
-// 	return OpenFile(fsys, name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-// }
-
+// Return the Disk structure file system
 func NewDisk() *Disk {
 	diskFs := afero.NewBasePathFs(afero.NewOsFs(), "storage")
 	ok, err := afero.DirExists(diskFs, "")
@@ -102,6 +82,7 @@ func NewDisk() *Disk {
 	return &Disk{FS: diskFs}
 }
 
+// Store key, value in the file system
 func (d *Disk) Store(key, val string) {
 	file, err := d.FS.Create(key)
 	if err != nil {
