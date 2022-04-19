@@ -17,5 +17,5 @@ func Run() {
 	flag.Parse()
 
 	server.Initialize(storageType)
-	server.Run("8080")
+	server.Run("8888")
 }
