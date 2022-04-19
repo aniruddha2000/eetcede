@@ -7,18 +7,17 @@ import (
 	"net/http"
 
 	"github.com/aniruddha2000/goEtcd/api/models"
-	"github.com/gorilla/mux"
 )
 
 // Server dependencies
 type Server struct {
-	Router *mux.Router
+	Router *http.ServeMux
 	Cache  models.Storage
 }
 
 // Initialize the routes
 func (s *Server) Initialize(storageType string) {
-	s.Router = mux.NewRouter()
+	s.Router = http.NewServeMux()
 
 	switch storageType {
 	case "in-memory":
