@@ -79,7 +79,7 @@ func NewDisk() *DiskFS {
 		log.Fatalf("Dir exists: %v", err)
 	}
 	if !ok {
-		err := diskFs.Mkdir("", os.ModePerm)
+		err := diskFs.Mkdir("storage", os.ModePerm)
 		if err != nil {
 			log.Fatalf("Create dir: %v", err)
 		}
@@ -103,13 +103,13 @@ func (d *DiskFS) Store(key, val string) {
 
 func (d *DiskFS) List() map[string]string {
 	m := make(map[string]string, 2)
-	dir, err := afero.ReadDir(d.FS, "")
+	dir, err := filesystem.ReadDir(d.FS, "storage")
 	if err != nil {
 		log.Fatalf("Error reading the directory: %v", err)
 	}
 
 	for _, fileName := range dir {
-		content, err := afero.ReadFile(d.FS, fileName.Name())
+		content, err := filesystem.ReadFile(d.FS, fileName.Name())
 		if err != nil {
 			log.Fatalf("Error reading the file: %v", err)
 		}
@@ -119,13 +119,13 @@ func (d *DiskFS) List() map[string]string {
 }
 
 func (d *DiskFS) Get(key string) (string, error) {
-	ok, err := afero.Exists(d.FS, key)
+	ok, err := filesystem.Exists(d.FS, key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
 	}
 
 	if ok {
-		file, err := afero.ReadFile(d.FS, key)
+		file, err := filesystem.ReadFile(d.FS, key)
 		if err != nil {
 			log.Fatalf("Error reading the file: %v", err)
 		}
@@ -135,7 +135,7 @@ func (d *DiskFS) Get(key string) (string, error) {
 }
 
 func (d *DiskFS) Delete(key string) error {
-	ok, err := afero.Exists(d.FS, key)
+	ok, err := filesystem.Exists(d.FS, key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
 	}
