@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/aniruddha2000/goEtcd/filesystem"
 	"github.com/spf13/afero"
 )
 
@@ -63,13 +64,17 @@ func (r *InMemory) Delete(key string) error {
 }
 
 type Disk struct {
-	FS  afero.Fs
+	FS afero.Fs
+}
+
+type DiskFS struct {
+	FS filesystem.Fs
 }
 
 // Return the Disk structure file system
-func NewDisk() *Disk {
-	diskFs := afero.NewBasePathFs(afero.NewOsFs(), "storage")
-	ok, err := afero.DirExists(diskFs, "")
+func NewDisk() *DiskFS {
+	diskFs := filesystem.NewOsFs()
+	ok, err := filesystem.DirExists(diskFs, "storage")
 	if err != nil {
 		log.Fatalf("Dir exists: %v", err)
 	}
@@ -79,11 +84,11 @@ func NewDisk() *Disk {
 			log.Fatalf("Create dir: %v", err)
 		}
 	}
-	return &Disk{FS: diskFs}
+	return &DiskFS{FS: diskFs}
 }
 
 // Store key, value in the file system
-func (d *Disk) Store(key, val string) {
+func (d *DiskFS) Store(key, val string) {
 	file, err := d.FS.Create(key)
 	if err != nil {
 		log.Fatalf("Create file: %v", err)
@@ -96,7 +101,7 @@ func (d *Disk) Store(key, val string) {
 	}
 }
 
-func (d *Disk) List() map[string]string {
+func (d *DiskFS) List() map[string]string {
 	m := make(map[string]string, 2)
 	dir, err := afero.ReadDir(d.FS, "")
 	if err != nil {
@@ -113,7 +118,7 @@ func (d *Disk) List() map[string]string {
 	return m
 }
 
-func (d *Disk) Get(key string) (string, error) {
+func (d *DiskFS) Get(key string) (string, error) {
 	ok, err := afero.Exists(d.FS, key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
@@ -129,7 +134,7 @@ func (d *Disk) Get(key string) (string, error) {
 	return "", errors.New("key not found")
 }
 
-func (d *Disk) Delete(key string) error {
+func (d *DiskFS) Delete(key string) error {
 	ok, err := afero.Exists(d.FS, key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
