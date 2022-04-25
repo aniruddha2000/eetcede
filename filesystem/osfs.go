@@ -40,7 +40,7 @@ func (OsFs) Mkdir(name string, perm os.FileMode) error {
 	return os.Mkdir(name, perm)
 }
 
-func Stat(name string) (os.FileInfo, error) {
+func (OsFs) Stat(name string) (os.FileInfo, error) {
 	return os.Stat(name)
 }
 
