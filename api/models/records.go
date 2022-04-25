@@ -75,6 +75,7 @@ type DiskFS struct {
 func NewDisk() *DiskFS {
 	diskFs := filesystem.NewOsFs()
 	ok, err := filesystem.DirExists(diskFs, "storage")
+	// afero.DirExists()
 	if err != nil {
 		log.Fatalf("Dir exists: %v", err)
 	}
@@ -89,7 +90,7 @@ func NewDisk() *DiskFS {
 
 // Store key, value in the file system
 func (d *DiskFS) Store(key, val string) {
-	file, err := d.FS.Create(key)
+	file, err := d.FS.Create("storage/" + key)
 	if err != nil {
 		log.Fatalf("Create file: %v", err)
 	}
@@ -109,7 +110,7 @@ func (d *DiskFS) List() map[string]string {
 	}
 
 	for _, fileName := range dir {
-		content, err := filesystem.ReadFile(d.FS, fileName.Name())
+		content, err := filesystem.ReadFile(d.FS, "storage/"+fileName.Name())
 		if err != nil {
 			log.Fatalf("Error reading the file: %v", err)
 		}
@@ -119,13 +120,13 @@ func (d *DiskFS) List() map[string]string {
 }
 
 func (d *DiskFS) Get(key string) (string, error) {
-	ok, err := filesystem.Exists(d.FS, key)
+	ok, err := filesystem.Exists(d.FS, "storage/"+key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
 	}
 
 	if ok {
-		file, err := filesystem.ReadFile(d.FS, key)
+		file, err := filesystem.ReadFile(d.FS, "storage/"+key)
 		if err != nil {
 			log.Fatalf("Error reading the file: %v", err)
 		}
@@ -135,12 +136,12 @@ func (d *DiskFS) Get(key string) (string, error) {
 }
 
 func (d *DiskFS) Delete(key string) error {
-	ok, err := filesystem.Exists(d.FS, key)
+	ok, err := filesystem.Exists(d.FS, "storage/"+key)
 	if err != nil {
 		log.Fatalf("File exist: %v", err)
 	}
 	if ok {
-		err = d.FS.Remove(key)
+		err = d.FS.Remove("storage/" + key)
 		if err != nil {
 			log.Fatalf("Delete file err: %v", err)
 		}
