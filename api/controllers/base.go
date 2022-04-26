@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aniruddha2000/goEtcd/api/models"
+	"github.com/aniruddha2000/eetcede/api/models"
 )
 
 // Server dependencies

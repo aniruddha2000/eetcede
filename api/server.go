@@ -3,7 +3,7 @@ package api
 import (
 	"flag"
 
-	"github.com/aniruddha2000/goEtcd/api/controllers"
+	"github.com/aniruddha2000/eetcede/api/controllers"
 )
 
 var server controllers.Server

@@ -1,4 +1,4 @@
-module github.com/aniruddha2000/goEtcd
+module github.com/aniruddha2000/eetcede
 
 go 1.17
 

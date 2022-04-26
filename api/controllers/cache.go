@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	j "github.com/aniruddha2000/goEtcd/api/json"
+	j "github.com/aniruddha2000/eetcede/api/json"
 )
 
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
