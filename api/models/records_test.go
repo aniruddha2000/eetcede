@@ -1,10 +1,11 @@
 package models
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
-	"github.com/spf13/afero"
+	"github.com/aniruddha2000/eetcede/filesystem"
 )
 
 func TestInMemory(t *testing.T) {
@@ -62,16 +63,17 @@ func TestInMemory(t *testing.T) {
 }
 
 func TestDisk(t *testing.T) {
+	defer DeleteOSDiskFS()
 	t.Run("Store", func(t *testing.T) {
-		disk := GetMemDisk()
+		disk := GetOSDiskFS()
 		key, val := "file", "system"
 		disk.Store(key, val)
 
-		if ok, _ := afero.Exists(disk.FS, key); !ok {
-			t.Error("Failed to create file")
+		if ok, _ := filesystem.Exists(disk.FS, disk.RootFolderName+"/"+key); !ok {
+			t.Errorf("Failed to create file: %v", key)
 		}
 
-		file, err := afero.ReadFile(disk.FS, key)
+		file, err := filesystem.ReadFile(disk.FS, disk.RootFolderName+"/"+key)
 		if err != nil {
 			t.Errorf("Couldn't read file : %v", err)
 		}
@@ -82,7 +84,7 @@ func TestDisk(t *testing.T) {
 	})
 
 	t.Run("List", func(t *testing.T) {
-		disk := GetMemDisk()
+		disk := GetOSDiskFS()
 		want := map[string]string{
 			"file": "system",
 			"data": "structure",
@@ -101,7 +103,7 @@ func TestDisk(t *testing.T) {
 
 	t.Run("Get", func(t *testing.T) {
 		key, val := "file", "system"
-		disk := GetMemDisk()
+		disk := GetOSDiskFS()
 		disk.Store(key, val)
 
 		_, err := disk.Get("Golang")
@@ -118,7 +120,7 @@ func TestDisk(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		key, val := "file", "system"
-		disk := GetMemDisk()
+		disk := GetOSDiskFS()
 		disk.Store(key, val)
 
 		disk.Delete(key)
@@ -130,7 +132,10 @@ func TestDisk(t *testing.T) {
 	})
 }
 
-func GetMemDisk() *Disk {
-	test_fs := afero.NewMemMapFs()
-	return &Disk{FS: test_fs}
+func GetOSDiskFS() *DiskFS {
+	return NewDisk("../../storage_test")
+}
+
+func DeleteOSDiskFS() {
+	os.RemoveAll("../../storage_test")
 }
