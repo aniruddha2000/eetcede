@@ -8,6 +8,7 @@ type OsFs struct {
 	Fs
 }
 
+// Return a File System for OS
 func NewOsFs() Fs {
 	return &OsFs{}
 }

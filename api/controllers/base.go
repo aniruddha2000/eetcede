@@ -23,7 +23,7 @@ func (s *Server) Initialize(storageType string) {
 	case "in-memory":
 		s.Cache = models.NewCache()
 	case "disk":
-		s.Cache = models.NewDisk()
+		s.Cache = models.NewDisk("storage")
 	default:
 		log.Fatal("Use flags `in-memory` or `disk`")
 	}
