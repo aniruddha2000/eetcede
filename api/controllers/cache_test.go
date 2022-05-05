@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/aniruddha2000/eetcede/api/models"
@@ -28,7 +28,7 @@ func TestCacheServer(t *testing.T) {
 				return w.Result()
 			},
 			want:       "Record created",
-			statusCode: 201,
+			statusCode: http.StatusCreated,
 		},
 		{
 			name:   "List",
@@ -40,12 +40,8 @@ func TestCacheServer(t *testing.T) {
 				s.List(w, req)
 				return w.Result()
 			},
-			want: `
-				{
-					"go": "lang",
-					"py": "con"
-				}`,
-			statusCode: 200,
+			want:       `{"go":"lang","py":"con"}`,
+			statusCode: http.StatusOK,
 		},
 		{
 			name:   "Get existing key-value",
@@ -57,11 +53,8 @@ func TestCacheServer(t *testing.T) {
 				s.Get(w, req)
 				return w.Result()
 			},
-			want: `
-			{
-				"go": "lang"
-			}`,
-			statusCode: 200,
+			want:       `{"go":"lang"}`,
+			statusCode: http.StatusOK,
 		},
 		{
 			name:   "Get non existing key value",
@@ -74,7 +67,7 @@ func TestCacheServer(t *testing.T) {
 				return w.Result()
 			},
 			want:       "key not found",
-			statusCode: 404,
+			statusCode: http.StatusNotFound,
 		},
 		{
 			name:   "Delete exixting key value",
@@ -87,7 +80,7 @@ func TestCacheServer(t *testing.T) {
 				return w.Result()
 			},
 			want:       "",
-			statusCode: 204,
+			statusCode: http.StatusNoContent,
 		},
 		{
 			name:   "Delete non exixting key value",
@@ -100,7 +93,59 @@ func TestCacheServer(t *testing.T) {
 				return w.Result()
 			},
 			want:       "key not found",
-			statusCode: 404,
+			statusCode: http.StatusNotFound,
+		},
+		{
+			name:   "Make GET Request on Create",
+			server: helperServer(t),
+			method: func(s *Server) *http.Response {
+				helperServerCreate(t, s)
+				req := httptest.NewRequest(http.MethodGet, "/record?key=py&val=con&key=go&val=lang", nil)
+				w := httptest.NewRecorder()
+				s.Create(w, req)
+				return w.Result()
+			},
+			want:       "POST Request accepted",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:   "Make POST Request on List",
+			server: helperServer(t),
+			method: func(s *Server) *http.Response {
+				helperServerCreate(t, s)
+				req := httptest.NewRequest(http.MethodPost, "/records", nil)
+				w := httptest.NewRecorder()
+				s.List(w, req)
+				return w.Result()
+			},
+			want:       "GET Request accepted",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:   "Make POST Request on Get",
+			server: helperServer(t),
+			method: func(s *Server) *http.Response {
+				helperServerCreate(t, s)
+				req := httptest.NewRequest(http.MethodPost, "/record?key=go", nil)
+				w := httptest.NewRecorder()
+				s.Get(w, req)
+				return w.Result()
+			},
+			want:       "GET Request accepted",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:   "Make POST Request on Get",
+			server: helperServer(t),
+			method: func(s *Server) *http.Response {
+				helperServerCreate(t, s)
+				req := httptest.NewRequest(http.MethodPost, "/record?key=go", nil)
+				w := httptest.NewRecorder()
+				s.Delete(w, req)
+				return w.Result()
+			},
+			want:       "DELETE Request accepted",
+			statusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -116,7 +161,7 @@ func TestCacheServer(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
-			if reflect.DeepEqual(string(got), tt.want) {
+			if !strings.Contains(string(got), tt.want) {
 				t.Errorf("expected %v got %v", tt.want, string(got))
 			}
 		})
