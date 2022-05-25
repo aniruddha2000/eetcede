@@ -175,6 +175,7 @@ func helperServer(t *testing.T) *Server {
 }
 
 func helperServerCreate(t *testing.T, s *Server) {
+	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, "/record?key=py&val=con&key=go&val=lang", nil)
 	w := httptest.NewRecorder()
 	s.Create(w, req)
