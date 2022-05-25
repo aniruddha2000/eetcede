@@ -93,7 +93,8 @@ func (d *DiskFS) Store(key, val string) {
 
 	_, err = file.Write([]byte(val))
 	if err != nil {
-		log.Fatalf("Writing file: %v", err)
+		log.Printf("Writing file: %v", err)
+		return
 	}
 }
 
