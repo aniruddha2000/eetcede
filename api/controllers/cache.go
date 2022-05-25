@@ -48,7 +48,7 @@ func (s *Server) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		j.JSON(w, r, http.StatusOK, map[string]string{key: val})
 	} else {
-		j.JSON(w, r, http.StatusBadRequest, "POST Request accepted")
+		j.JSON(w, r, http.StatusBadRequest, "GET Request accepted")
 	}
 }
 
@@ -66,7 +66,7 @@ func (s *Server) Delete(w http.ResponseWriter, r *http.Request) {
 			j.JSON(w, r, http.StatusNotFound, err.Error())
 			return
 		}
-		j.JSON(w, r, http.StatusNoContent, map[string]string{"data": "delete"})
+		j.JSON(w, r, http.StatusNoContent, "Data Deleted")
 	} else {
 		j.JSON(w, r, http.StatusBadRequest, "DELETE Request accepted")
 	}
