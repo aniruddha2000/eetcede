@@ -44,6 +44,7 @@ func (s *Server) Run(addr string) {
 		Addr:    ":" + addr,
 		Handler: s.Router,
 		TLSConfig: &tls.Config{
+			MinVersion:   tls.VersionTLS13,
 			Certificates: []tls.Certificate{cert},
 		},
 	}
